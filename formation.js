@@ -27,6 +27,8 @@ window.addEventListener("load", function (event) {
       this.pieces = [];
       this.size = 10;
       this.speed = 5;
+      this.color = "white";
+      this.range = 200;
     }
 
     //prettier-ignore
@@ -60,9 +62,26 @@ window.addEventListener("load", function (event) {
       if (this.y > canvas.height + 4 * this.size) this.y = -this.size;
       if (this.y < -4 * this.size) this.y = canvas.height - this.size;
     }
+
+    inNeighborhood(fish) {
+      // Determine if fish is in neighborhood
+      const a = fish.x - this.x;
+      const b = fish.y - this.y;
+      const c = Math.sqrt(a * a + b * b);
+      if (c < this.range) return true;
+      else return false;
+    }
   }
 
   const numFishes = 10;
+  const controlFish = new Fish(
+    Math.random() * canvas.width,
+    Math.random() * canvas.height
+  );
+  controlFish.buildFish();
+  controlFish.pieces.forEach((piece) => {
+    piece.color = "yellow";
+  });
   const fishes = [];
 
   for (i = 0; i < numFishes; i++) {
@@ -107,7 +126,15 @@ window.addEventListener("load", function (event) {
     });
   };
 
+  const drawNeighborhood = function (fish) {
+    context.fillStyle = "grey";
+    context.beginPath();
+    context.arc(fish.x, fish.y, fish.range, 0, Math.PI * 2);
+    context.fill();
+  };
+
   const update = function () {
+    controlFish.move();
     fishes.forEach((fish) => {
       fish.move();
     });
@@ -116,9 +143,20 @@ window.addEventListener("load", function (event) {
   const render = function () {
     context.fillStyle = "blue";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    // fishes.forEach((fish) => {
-    //   drawFish(fish);
-    // });
+    drawNeighborhood(controlFish);
+    drawFish(controlFish);
+    fishes.forEach((fish) => {
+      drawFish(fish);
+    });
+
+    for (fish of fishes) {
+      if (controlFish.inNeighborhood(fish)) {
+        context.strokeStyle = "black";
+        context.moveTo(controlFish.x, controlFish.y);
+        context.lineTo(fish.x, fish.y);
+        context.stroke();
+      }
+    }
   };
 
   const start = function () {
