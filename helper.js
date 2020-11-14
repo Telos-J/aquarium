@@ -39,6 +39,10 @@ class Vector2 {
         return result;
     }
 
+    dot(vector) {
+        return this.x * vector.x + this.y * vector.y;
+    }
+
     magnitude() {
         return Math.sqrt(this.x ** 2 + this.y ** 2);
     }
