@@ -170,7 +170,9 @@ window.addEventListener("load", function (event) {
     for (fish of fishes) {
       if (controlFish.inNeighborhood(fish)) {
         // avoidance, allignment, cohesion
-        controlFish.avoidance = controlFish.position.sub(fish.position);
+        controlFish.avoidance = controlFish.avoidance.add(
+          controlFish.position.sub(fish.position)
+        );
       }
     }
     controlFish.avoidance = controlFish.avoidance.normalize(0.3);
