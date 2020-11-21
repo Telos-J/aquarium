@@ -79,11 +79,16 @@ window.addEventListener("load", function (event) {
     }
 
     inNeighborhood(fish) {
-      // Determine if fish is in neighborhood
       const relPos = fish.position.sub(this.position);
       const dis = relPos.magnitude();
 
-      if (dis < this.range) return true;
+      const cos =
+        this.velocity.dot(relPos) /
+        this.velocity.magnitude() /
+        relPos.magnitude();
+
+      if (dis < this.range && cos < 1 && cos > Math.cos((Math.PI * 3) / 4))
+        return true;
       else return false;
     }
   }
@@ -144,13 +149,19 @@ window.addEventListener("load", function (event) {
   const drawNeighborhood = function (fish) {
     context.fillStyle = "grey";
     context.beginPath();
-    context.arc(fish.position.x, fish.position.y, fish.range, 0, Math.PI * 2);
+    context.moveTo(fish.position.x, fish.position.y);
+    context.arc(
+      fish.position.x,
+      fish.position.y,
+      fish.range,
+      fish.head - (Math.PI * 3) / 4,
+      fish.head + (Math.PI * 3) / 4
+    );
     context.fill();
   };
 
   const update = function () {
     controlFish.move();
-    debugger;
     fishes.forEach((fish) => {
       fish.move();
     });
