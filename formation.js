@@ -162,7 +162,7 @@ window.addEventListener("load", function (event) {
         controlFish.avoidance = controlFish.position.sub(fish.position);
       }
     }
-    controlFish.avoidance = controlFish.avoidance.normalize(1);
+    controlFish.avoidance = controlFish.avoidance.normalize(0.3);
   };
 
   const render = function () {
