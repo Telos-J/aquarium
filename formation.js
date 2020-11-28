@@ -7,7 +7,7 @@ controlFish.pieces.forEach((piece) => {
   piece.color = "yellow";
 });
 
-const numFishes = 10;
+const numFishes = 50;
 const fishes = [controlFish];
 
 for (i = 0; i < numFishes; i++) {
@@ -26,18 +26,26 @@ const update = function () {
 
   for (fish of fishes) {
     fish.avoidance.set(0, 0);
+    fish.alignment.set(0, 0);
+    fish.cohesion.set(0, 0);
+    let counter = 0;
+    let headAverage = fish.head;
+    let positionAverage = fish.position;
     for (otherFish of fishes) {
-      let fishAverage = otherFish.head / (numFishes + 1);
-
       if (fish.inNeighborhood(otherFish)) {
-        // avoidance, allignment, cohesion
-        // fish.avoidance = fish.avoidance.add(
-        //   fish.position.sub(otherFish.position)
-        // );
-        fish.alignment = angleToVector(fishAverage);
+        fish.avoidance = fish.avoidance.add(
+          fish.position.sub(otherFish.position)
+        );
+        headAverage = (counter * headAverage + otherFish.head) / (counter + 1);
+        positionAverage = positionAverage
+          .scale(counter)
+          .add(otherFish.position)
+          .scale(1 / (counter + 1));
       }
     }
-    // fish.avoidance = fish.avoidance.normalize(0.3);
+    fish.avoidance = fish.avoidance.normalize(0.06);
+    fish.alignment = angleToVector(headAverage).normalize(0.07);
+    fish.cohesion = positionAverage.sub(fish.position).normalize(0.05);
   }
 };
 

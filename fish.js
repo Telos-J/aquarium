@@ -11,7 +11,7 @@ class Fish {
   constructor(x, y) {
     this.head = Math.random() * 2 * Math.PI;
     this.pieces = [];
-    this.size = 10;
+    this.size = 7;
     this.speed = 4;
     this.color = "white";
     this.range = 200;
