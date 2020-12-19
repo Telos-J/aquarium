@@ -2,13 +2,13 @@ const controlFish = new Fish(
   Math.random() * canvas.width,
   Math.random() * canvas.height
 );
-controlFish.buildFish();
-controlFish.pieces.forEach((piece) => {
-  piece.color = "yellow";
-});
+// controlFish.buildFish();
+// controlFish.pieces.forEach((piece) => {
+//   piece.color = "yellow";
+// });
 
-const numFishes = 50;
-const fishes = [controlFish];
+const numFishes = 3;
+const fishes = [];
 
 for (i = 0; i < numFishes; i++) {
   const fish = new Fish(
@@ -52,20 +52,20 @@ const update = function () {
 const render = function () {
   context.fillStyle = "blue";
   context.fillRect(0, 0, canvas.width, canvas.height);
-  drawNeighborhood(controlFish);
-  drawFish(controlFish);
+  // drawNeighborhood(controlFish);
+  // drawFish(controlFish);
   fishes.forEach((fish) => {
     drawFish(fish);
   });
 
-  for (fish of fishes) {
-    if (controlFish.inNeighborhood(fish)) {
-      context.strokeStyle = "black";
-      context.moveTo(controlFish.position.x, controlFish.position.y);
-      context.lineTo(fish.position.x, fish.position.y);
-      context.stroke();
-    }
-  }
+  // for (fish of fishes) {
+  //   if (controlFish.inNeighborhood(fish)) {
+  //     context.strokeStyle = "black";
+  //     context.moveTo(controlFish.position.x, controlFish.position.y);
+  //     context.lineTo(fish.position.x, fish.position.y);
+  //     context.stroke();
+  //     }
+  //   }
 };
 
 const start = function () {
