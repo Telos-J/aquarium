@@ -7,7 +7,7 @@ const controlFish = new Fish(
 //     piece.color = 'yellow';
 // });
 
-const numFishes = 3;
+const numFishes = 1;
 const fishes = [];
 
 for (i = 0; i < numFishes; i++) {
@@ -15,7 +15,7 @@ for (i = 0; i < numFishes; i++) {
     Math.random() * canvas.width,
     Math.random() * canvas.height
   );
-  fish.buildFish();
+  fish.buildShark();
   fishes.push(fish);
 }
 
