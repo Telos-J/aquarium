@@ -11,8 +11,8 @@ class Fish {
   constructor(x, y) {
     this.head = Math.random() * 2 * Math.PI;
     this.pieces = [];
-    this.size = 7;
-    this.speed = 4;
+    this.size = 3;
+    this.speed = 3;
     this.color = "white";
     this.range = 200;
     this.position = new Vector2(x, y);
@@ -23,7 +23,7 @@ class Fish {
     this.alignment = new Vector2();
     this.cohesion = new Vector2();
     this.avoidanceConstant = 0.06;
-    this.avoidanceWallConstant = 0.05;
+    this.avoidanceWallConstant = 0.1;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
   }
@@ -31,24 +31,24 @@ class Fish {
   //prettier-ignore
   buildFish() {
     // head
-    this.pieces.push(new FishPiece(this.size *2, 0, 0, "white"));
+    this.pieces.push(new FishPiece(this.size * 2, 0, 0, 0, "white"));
     // //eye
-    this.pieces.push(new FishPiece(this.size, 0, 0, "black"));
-    this.pieces.push(new FishPiece(this.size, 0, thisize, "white"));
-    this.pieces.push(new FishPiece(this.size, 0, -this.size, "white"));
+    this.pieces.push(new FishPiece(this.size, 0, 0, 0, "black"));
+    this.pieces.push(new FishPiece(this.size, 0, this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size, 0, -this.size, 0, "white"));
     //spine
-    this.pieces.push(new FishPiece(this.size, -2 * this.size, 0, "gray"));
-    this.pieces.push(new FishPiece(this.size, -3 * this.size, 0, "gray"));
-    this.pieces.push(new FishPiece(this.size, -this.size, 0, "gray"));
+    this.pieces.push(new FishPiece(this.size, -2 * this.size, 0, 0, "gray"));
+    this.pieces.push(new FishPiece(this.size, -3 * this.size, 0, 0, "gray"));
+    this.pieces.push(new FishPiece(this.size, -this.size, 0, 0, "gray"));
     // //body
-    this.pieces.push(new FishPiece(this.size, -2 * this.size, this.size, "white"));
-    this.pieces.push(new FishPiece(this.size, -3 * this.size, this.size, "white"));
-    this.pieces.push(new FishPiece(this.size, -3 * this.size, -this.size, "white"));
-    this.pieces.push(new FishPiece(this.size, -2 * this.size, -this.size, "white"));
-    this.pieces.push(new FishPiece(this.size, -this.size, -this.size, "white"));
-    this.pieces.push(new FishPiece(this.size, -this.size, this.size, "white"));
+    this.pieces.push(new FishPiece(this.size, -2 * this.size, this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size, -3 * this.size, this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size, -3 * this.size, -this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size, -2 * this.size, -this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size, -this.size, -this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size, -this.size, this.size, 0, "white"));
     // //tail
-    this.pieces.push(new FishPiece(this.size*3/2, -4.5 * this.size, 0, "white"));
+    this.pieces.push(new FishPiece(this.size * 3 / 2, -4.5 * this.size, 0, 0, "white"));
   }
 
   //prettier-ignore
