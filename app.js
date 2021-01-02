@@ -26,11 +26,23 @@ const update = function () {
 
   for (fish of fishes) {
     fish.avoidance.set(0, 0);
+    fish.avoidanceWall.set(0, 0);
     fish.alignment.set(0, 0);
     fish.cohesion.set(0, 0);
+
     let counter = 0;
     let headAverage = fish.head;
     let positionAverage = fish.position;
+    
+    if (fish.position.x < fish.range)
+      fish.avoidanceWall.x += fish.avoidanceWallConstant
+    if (fish.position.y < fish.range)
+      fish.avoidanceWall.y += fish.avoidanceWallConstant
+    if (fish.position.x > canvas.width - fish.range)
+      fish.avoidanceWall.x -= fish.avoidanceWallConstant
+    if (fish.position.y > canvas.height - fish.range)
+      fish.avoidanceWall.y -= fish.avoidanceWallConstant
+    
     for (otherFish of fishes) {
       if (fish.inNeighborhood(otherFish)) {
         fish.avoidance = fish.avoidance.add(
@@ -43,12 +55,9 @@ const update = function () {
           .scale(1 / (counter + 1));
       }
     }
-    fish.avoidance = fish.avoidance.normalize(0.06);
-    fish.alignment = angleToVector(headAverage).normalize(0.07);
-    fish.cohesion = positionAverage.sub(fish.position).normalize(0.06);
-    // fish.avoidance = fish.avoidance.normalize(0.06);
-    // fish.alignment = angleToVector(headAverage).normalize(0.07);
-    // fish.cohesion = positionAverage.sub(fish.position).normalize(0.05);
+    fish.avoidance = fish.avoidance.normalize(fish.avoidanceConstant);
+    fish.alignment = angleToVector(headAverage).normalize(fish.alignmentConstant);
+    fish.cohesion = positionAverage.sub(fish.position).normalize(fish.cohesionConstant);
   }
 };
 
