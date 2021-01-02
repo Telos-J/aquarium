@@ -7,16 +7,27 @@ const controlFish = new Fish(
 //     piece.color = 'yellow';
 // });
 
-const numFishes = 100;
+const numFishes = 50;
+const numSharks = 5;
 const fishes = [];
+const sharks = [];
 
 for (i = 0; i < numFishes; i++) {
   const fish = new Fish(
     Math.random() * canvas.width,
     Math.random() * canvas.height
   );
-  Math.random() < 0.1 ? fish.buildShark() : fish.buildFish();
+  fish.buildFish()
   fishes.push(fish);
+}
+
+for (i = 0; i < numSharks; i++) {
+  const shark = new Fish(
+    Math.random() * canvas.width,
+    Math.random() * canvas.height
+  );
+  shark.buildShark()
+  sharks.push(shark);
 }
 
 const update = function () {
@@ -24,9 +35,8 @@ const update = function () {
     fish.move();
   });
 
-  for (fish of fishes) {
+  for (let fish of fishes) {
     fish.avoidance.set(0, 0);
-    fish.avoidanceWall.set(0, 0);
     fish.alignment.set(0, 0);
     fish.cohesion.set(0, 0);
 
@@ -34,14 +44,7 @@ const update = function () {
     let headAverage = fish.head;
     let positionAverage = fish.position;
     
-    if (fish.position.x < fish.range)
-      fish.avoidanceWall.x += fish.avoidanceWallConstant
-    if (fish.position.y < fish.range)
-      fish.avoidanceWall.y += fish.avoidanceWallConstant
-    if (fish.position.x > canvas.width - fish.range)
-      fish.avoidanceWall.x -= fish.avoidanceWallConstant
-    if (fish.position.y > canvas.height - fish.range)
-      fish.avoidanceWall.y -= fish.avoidanceWallConstant
+    fish.avoidWall()
     
     for (otherFish of fishes) {
       if (fish.inNeighborhood(otherFish)) {
@@ -59,6 +62,11 @@ const update = function () {
     fish.alignment = angleToVector(headAverage).normalize(fish.alignmentConstant);
     fish.cohesion = positionAverage.sub(fish.position).normalize(fish.cohesionConstant);
   }
+  
+  for (let shark of sharks) {
+    shark.move()
+    shark.avoidWall()
+  }
 };
 
 const render = function () {
@@ -66,9 +74,12 @@ const render = function () {
   context.fillRect(0, 0, canvas.width, canvas.height);
   // drawNeighborhood(controlFish);
   // drawFish(controlFish);
-  fishes.forEach((fish) => {
+  for (let fish of fishes) {
     drawFish(fish);
-  });
+  }
+  for (let shark of sharks) {
+    drawFish(shark);
+  }
 };
 
 const start = function () {

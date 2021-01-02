@@ -107,6 +107,19 @@ class Fish {
       return true;
     else return false;
   }
+  
+  avoidWall() {
+    this.avoidanceWall.set(0, 0);
+
+    if (this.position.x < this.range)
+      this.avoidanceWall.x += this.avoidanceWallConstant
+    if (this.position.y < this.range)
+      this.avoidanceWall.y += this.avoidanceWallConstant
+    if (this.position.x > canvas.width - this.range)
+      this.avoidanceWall.x -= this.avoidanceWallConstant
+    if (this.position.y > canvas.height - this.range)
+      this.avoidanceWall.y -= this.avoidanceWallConstant
+  }
 }
 
 const drawFishPiece = function (x, y, size, direction, head, color) {
