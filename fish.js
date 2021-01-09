@@ -20,12 +20,17 @@ class Fish {
     this.velocity = this.velocity.scale(this.speed);
     this.avoidance = new Vector2();
     this.avoidanceWall = new Vector2();
+    this.avoidanceShark = new Vector2();
     this.alignment = new Vector2();
     this.cohesion = new Vector2();
+    this.chaseFish = new Vector2()
     this.avoidanceConstant = 0.06;
     this.avoidanceWallConstant = 0.1;
+    this.avoidanceSharkConstant = 0.4;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
+    this.chaseFishConstant = 0.1;
+    this.target = undefined;
   }
 
   //prettier-ignore
@@ -86,8 +91,10 @@ class Fish {
     this.velocity = this.velocity.add(
       this.avoidance,
       this.avoidanceWall,
+      this.avoidanceShark,
       this.alignment,
-      this.cohesion
+      this.cohesion,
+      this.chaseFish
     );
     this.velocity = this.velocity.normalize(this.speed);
     this.head = vectorToAngle(this.velocity);
@@ -119,6 +126,40 @@ class Fish {
       this.avoidanceWall.x -= this.avoidanceWallConstant
     if (this.position.y > canvas.height - this.range)
       this.avoidanceWall.y -= this.avoidanceWallConstant
+  }
+  
+  avoidShark(sharks) {
+    this.avoidanceShark.set(0, 0);
+
+    for (const shark of sharks) {
+      if (this.inNeighborhood(shark)) {
+        this.avoidanceShark = this.avoidanceShark.add(
+          this.position.sub(shark.position)
+        );
+      }
+    }
+
+    this.avoidanceShark = this.avoidanceShark.normalize(this.avoidanceSharkConstant);
+  }
+  
+  chase(fishes) {
+    this.chaseFish.set(0, 0);
+    let distance = this.range;
+
+    if (!this.target || !this.inNeighborhood(this.target))
+      for (const fish of fishes) {
+        if (this.inNeighborhood(fish)) {
+          const tempDistance = this.position.sub(fish.position).magnitude()
+          console.log(tempDistance)
+          if (distance > tempDistance) {
+            distance = tempDistance;
+            this.target = fish;
+          }
+        }
+      }
+    
+    if (this.target)
+      this.chaseFish = this.target.position.sub(this.position).normalize(this.chaseFishConstant)
   }
 }
 
@@ -160,7 +201,6 @@ const drawFish = function (fish) {
 };
 
 const drawNeighborhood = function (fish) {
-  context.strokeStyle = "rgba(241, 241, 241, 0.5)";
   context.fillStyle = "rgba(241, 241, 241, 0.5)";
   context.beginPath();
   context.moveTo(fish.position.x, fish.position.y);
@@ -175,6 +215,8 @@ const drawNeighborhood = function (fish) {
 
   for (otherFish of fishes) {
     if (fish.inNeighborhood(otherFish)) {
+      if (fish.target === otherFish) context.strokeStyle = "red";
+      else context.strokeStyle = "rgba(241, 241, 241, 0.5)";
       context.beginPath();
       context.moveTo(fish.position.x, fish.position.y);
       context.lineTo(otherFish.position.x, otherFish.position.y);

@@ -2,6 +2,7 @@ const controlFish = new Fish(
   Math.random() * canvas.width,
   Math.random() * canvas.height
 );
+
 // controlFish.buildFish();
 // controlFish.pieces.forEach((piece) => {
 //     piece.color = 'yellow';
@@ -10,7 +11,14 @@ const controlFish = new Fish(
 const numFishes = 50;
 const numSharks = 5;
 const fishes = [];
-const sharks = [];
+
+const controlShark = new Fish(
+  Math.random() * canvas.width,
+  Math.random() * canvas.height
+);
+controlShark.buildShark()
+
+const sharks = [controlShark];
 
 for (i = 0; i < numFishes; i++) {
   const fish = new Fish(
@@ -31,10 +39,6 @@ for (i = 0; i < numSharks; i++) {
 }
 
 const update = function () {
-  fishes.forEach((fish) => {
-    fish.move();
-  });
-
   for (let fish of fishes) {
     fish.avoidance.set(0, 0);
     fish.alignment.set(0, 0);
@@ -46,7 +50,7 @@ const update = function () {
     
     fish.avoidWall()
     
-    for (otherFish of fishes) {
+    for (const otherFish of fishes) {
       if (fish.inNeighborhood(otherFish)) {
         fish.avoidance = fish.avoidance.add(
           fish.position.sub(otherFish.position)
@@ -58,22 +62,27 @@ const update = function () {
           .scale(1 / (counter + 1));
       }
     }
+
+    fish.avoidShark(sharks)
+
     fish.avoidance = fish.avoidance.normalize(fish.avoidanceConstant);
     fish.alignment = angleToVector(headAverage).normalize(fish.alignmentConstant);
     fish.cohesion = positionAverage.sub(fish.position).normalize(fish.cohesionConstant);
+    fish.move();
   }
   
-  for (let shark of sharks) {
-    shark.move()
+  for (const shark of sharks) {
     shark.avoidWall()
+    shark.move()
+    shark.chase(fishes)
   }
 };
 
 const render = function () {
   context.fillStyle = "blue";
   context.fillRect(0, 0, canvas.width, canvas.height);
-  // drawNeighborhood(controlFish);
-  // drawFish(controlFish);
+  drawNeighborhood(controlShark);
+  drawFish(controlShark);
   for (let fish of fishes) {
     drawFish(fish);
   }
