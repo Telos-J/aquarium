@@ -26,7 +26,7 @@ class Fish {
   }
   
   starve() {
-    this.hunger -= 0.01;
+    this.hunger -= 0.02;
     return this.hunger < 0 ? true : false
   }
 
@@ -140,7 +140,8 @@ class Shark extends Fish {
 
   move() {
     this.velocity = this.velocity.add(
-      this.chaseFish
+      this.chaseFish,
+      this.avoidanceWall
     );
    super.move()
   }

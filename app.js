@@ -6,12 +6,12 @@ const mode = "display";
 // );
 // controlShark.buildShark()
 
-const numFishes = 50;
-const numSharks = 5;
+let numFishes = 0;
+let numSharks = 2;
 let fishes = [];
 let sharks = [];
 
-for (i = 0; i < numFishes; i++) {
+for (let i = 0; i < numFishes; i++) {
   const fish = new SchoolingFish(
     Math.random() * canvas.width,
     Math.random() * canvas.height
@@ -20,7 +20,7 @@ for (i = 0; i < numFishes; i++) {
   fishes.push(fish);
 }
 
-for (i = 0; i < numSharks; i++) {
+for (let i = 0; i < numSharks; i++) {
   const shark = new Shark(
     Math.random() * canvas.width,
     Math.random() * canvas.height
@@ -29,7 +29,33 @@ for (i = 0; i < numSharks; i++) {
   sharks.push(shark);
 }
 
+const KFish = 50;
+const rFish = 0.001;
+const KShark = 10;
+const rShark = 0.0005;
+
 function update() {
+  numFishes = numFishes + rFish * numFishes * (1 - numFishes / KFish);
+  numSharks = numSharks + rShark * numSharks * (1 - numSharks / KShark);
+
+  for (let i = 0; i < Math.floor(numFishes - fishes.length); i++) {
+    const fish = new SchoolingFish(
+      Math.random() * canvas.width,
+      Math.random() * canvas.height
+    );
+    fish.buildFish();
+    fishes.push(fish);
+  }
+
+  for (let i = 0; i < Math.floor(numSharks - sharks.length); i++) {
+    const shark = new Shark(
+      Math.random() * canvas.width,
+      Math.random() * canvas.height
+    );
+    shark.buildShark();
+    sharks.push(shark);
+  }
+  
   for (let fish of fishes) {
     fish.avoidance.set(0, 0);
     fish.alignment.set(0, 0);
@@ -62,7 +88,7 @@ function update() {
     fish.move();
   }
   
-  const tempSharks = sharks
+  const tempSharks = sharks;
   
   for (const shark of tempSharks) {
     shark.avoidWall()
@@ -71,6 +97,9 @@ function update() {
     fishes = shark.eat(fishes)
     sharks = sharks.filter((shark) => !shark.starve())
   }
+  
+  const numSharkDiff = numSharks - sharks.length;
+  if (numSharkDiff > 1) numSharks = numSharks - numSharkDiff;
 };
 
 function render() {
