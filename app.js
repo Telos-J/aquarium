@@ -6,7 +6,7 @@ const mode = "display";
 // );
 // controlShark.buildShark()
 
-let numFishes = 0;
+let numFishes = 10;
 let numSharks = 2;
 let fishes = [];
 let sharks = [];
@@ -98,6 +98,8 @@ function update() {
     sharks = sharks.filter((shark) => !shark.starve())
   }
   
+  const numFishDiff = numFishes - fishes.length;
+  if (numFishDiff > 1) numFishes = numFishes - numFishDiff;
   const numSharkDiff = numSharks - sharks.length;
   if (numSharkDiff > 1) numSharks = numSharks - numSharkDiff;
 };
@@ -123,7 +125,7 @@ function loop() {
 function start() {
   if (mode === "display") loop()
   else if (mode === "nodisplay") {
-    while (fishes.length && sharks.length) {
+    while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 1000) {
       update()
       populationChart.data.labels.push('')
       populationChart.data.datasets[0].data.push(sharks.length)

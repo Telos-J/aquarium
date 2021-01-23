@@ -26,7 +26,7 @@ class Fish {
   }
   
   starve() {
-    this.hunger -= 0.02;
+    this.hunger -= 0.01;
     return this.hunger < 0 ? true : false
   }
 
