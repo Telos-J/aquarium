@@ -125,7 +125,7 @@ function loop() {
 function start() {
   if (mode === "display") loop()
   else if (mode === "nodisplay") {
-    while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 1000) {
+    while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 10000) {
       update()
       populationChart.data.labels.push('')
       populationChart.data.datasets[0].data.push(sharks.length)
