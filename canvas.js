@@ -1,4 +1,4 @@
-canvas = document.querySelector('canvas');
+const canvas = document.querySelector('#sim');
 const context = canvas.getContext('2d');
 
 canvas.width = innerWidth;

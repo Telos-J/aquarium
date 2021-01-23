@@ -1,27 +1,18 @@
-const controlFish = new Fish(
-  Math.random() * canvas.width,
-  Math.random() * canvas.height
-);
+const mode = "display";
 
-// controlFish.buildFish();
-// controlFish.pieces.forEach((piece) => {
-//     piece.color = 'yellow';
-// });
+// const controlShark = new Shark(
+//   Math.random() * canvas.width,
+//   Math.random() * canvas.height
+// );
+// controlShark.buildShark()
 
 const numFishes = 50;
 const numSharks = 5;
-const fishes = [];
-
-const controlShark = new Fish(
-  Math.random() * canvas.width,
-  Math.random() * canvas.height
-);
-controlShark.buildShark()
-
-const sharks = [controlShark];
+let fishes = [];
+let sharks = [];
 
 for (i = 0; i < numFishes; i++) {
-  const fish = new Fish(
+  const fish = new SchoolingFish(
     Math.random() * canvas.width,
     Math.random() * canvas.height
   );
@@ -30,7 +21,7 @@ for (i = 0; i < numFishes; i++) {
 }
 
 for (i = 0; i < numSharks; i++) {
-  const shark = new Fish(
+  const shark = new Shark(
     Math.random() * canvas.width,
     Math.random() * canvas.height
   );
@@ -38,7 +29,7 @@ for (i = 0; i < numSharks; i++) {
   sharks.push(shark);
 }
 
-const update = function () {
+function update() {
   for (let fish of fishes) {
     fish.avoidance.set(0, 0);
     fish.alignment.set(0, 0);
@@ -71,18 +62,21 @@ const update = function () {
     fish.move();
   }
   
-  for (const shark of sharks) {
+  const tempSharks = sharks
+  
+  for (const shark of tempSharks) {
     shark.avoidWall()
     shark.move()
     shark.chase(fishes)
+    fishes = shark.eat(fishes)
+    sharks = sharks.filter((shark) => !shark.starve())
   }
 };
 
-const render = function () {
+function render() {
   context.fillStyle = "blue";
   context.fillRect(0, 0, canvas.width, canvas.height);
-  drawNeighborhood(controlShark);
-  drawFish(controlShark);
+  // drawNeighborhood(controlShark);
   for (let fish of fishes) {
     drawFish(fish);
   }
@@ -91,10 +85,23 @@ const render = function () {
   }
 };
 
-const start = function () {
+function loop() {
   update();
   render();
-  window.requestAnimationFrame(start);
+  window.requestAnimationFrame(loop);
 };
+
+function start() {
+  if (mode === "display") loop()
+  else if (mode === "nodisplay") {
+    while (fishes.length && sharks.length) {
+      update()
+      populationChart.data.labels.push('')
+      populationChart.data.datasets[0].data.push(sharks.length)
+      populationChart.data.datasets[1].data.push(fishes.length)
+    }
+    populationChart.update()
+  }
+}
 
 start();

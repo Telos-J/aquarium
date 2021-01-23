@@ -13,27 +13,80 @@ class Fish {
     this.pieces = [];
     this.size = 3;
     this.speed = 3;
-    this.color = "white";
     this.range = 200;
+    this.hunger = 100;
     this.position = new Vector2(x, y);
-    this.velocity = angleToVector(this.head);
-    this.velocity = this.velocity.scale(this.speed);
+    this.velocity = angleToVector(this.head).scale(this.speed);
+  }
+
+  move() {
+    this.velocity = this.velocity.normalize(this.speed);
+    this.head = vectorToAngle(this.velocity);
+    this.position = this.position.add(this.velocity);
+  }
+  
+  starve() {
+    this.hunger -= 0.01;
+    return this.hunger < 0 ? true : false
+  }
+
+  inNeighborhood(fish) {
+    const relPos = fish.position.sub(this.position);
+    const dis = relPos.magnitude();
+
+    const cos =
+      this.velocity.dot(relPos) /
+      this.velocity.magnitude() /
+      relPos.magnitude();
+
+    if (dis < this.range && cos < 1 && cos > Math.cos((Math.PI * 3) / 4))
+      return true;
+    else return false;
+  }
+  
+  avoidWall() {
+    this.avoidanceWall.set(0, 0);
+
+    if (this.position.x < this.range)
+      this.avoidanceWall.x += this.avoidanceWallConstant
+    if (this.position.y < this.range)
+      this.avoidanceWall.y += this.avoidanceWallConstant
+    if (this.position.x > canvas.width - this.range)
+      this.avoidanceWall.x -= this.avoidanceWallConstant
+    if (this.position.y > canvas.height - this.range)
+      this.avoidanceWall.y -= this.avoidanceWallConstant
+  }
+}
+
+class SchoolingFish extends Fish {
+  constructor(x, y) {
+    super(x, y);
+    this.size = 3;
+    this.speed = 3;
+    this.range = 200;
     this.avoidance = new Vector2();
     this.avoidanceWall = new Vector2();
     this.avoidanceShark = new Vector2();
     this.alignment = new Vector2();
     this.cohesion = new Vector2();
-    this.chaseFish = new Vector2()
     this.avoidanceConstant = 0.06;
     this.avoidanceWallConstant = 0.1;
     this.avoidanceSharkConstant = 0.4;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
-    this.chaseFishConstant = 0.1;
-    this.target = undefined;
   }
 
-  //prettier-ignore
+  move() {
+    this.velocity = this.velocity.add(
+      this.avoidance,
+      this.avoidanceWall,
+      this.avoidanceShark,
+      this.alignment,
+      this.cohesion,
+    );
+   super.move()
+  }
+
   buildFish() {
     // head
     this.pieces.push(new FishPiece(this.size * 2, 0, 0, 0, "white"));
@@ -56,7 +109,42 @@ class Fish {
     this.pieces.push(new FishPiece(this.size * 3 / 2, -4.5 * this.size, 0, 0, "white"));
   }
 
-  //prettier-ignore
+  avoidShark(sharks) {
+    this.avoidanceShark.set(0, 0);
+
+    for (const shark of sharks) {
+      if (this.inNeighborhood(shark)) {
+        this.avoidanceShark = this.avoidanceShark.add(
+          this.position.sub(shark.position)
+        );
+      }
+    }
+
+    this.avoidanceShark = this.avoidanceShark.normalize(this.avoidanceSharkConstant);
+  }
+}
+
+class Shark extends Fish {
+  constructor(x, y) {
+    super(x, y);
+    this.size = 3;
+    this.speed = 5;
+    this.range = 200;
+    this.eatRange = 10;
+    this.avoidanceWall = new Vector2();
+    this.chaseFish = new Vector2()
+    this.avoidanceWallConstant = 0.2;
+    this.chaseFishConstant = 0.1;
+    this.target = undefined;
+  }
+
+  move() {
+    this.velocity = this.velocity.add(
+      this.chaseFish
+    );
+   super.move()
+  }
+  
   buildShark() {
     //Fin
     this.pieces.push(new FishPiece(this.size*2 , -this.size*7, -this.size*3, 0, "#5295c0"));
@@ -86,62 +174,14 @@ class Fish {
     //top fin
     this.pieces.push(new FishPiece(this.size*4 , -this.size*8, this.size*3, 0, "#5295c0"));
   }
-
-  move() {
-    this.velocity = this.velocity.add(
-      this.avoidance,
-      this.avoidanceWall,
-      this.avoidanceShark,
-      this.alignment,
-      this.cohesion,
-      this.chaseFish
-    );
-    this.velocity = this.velocity.normalize(this.speed);
-    this.head = vectorToAngle(this.velocity);
-    this.position = this.position.add(this.velocity);
-  }
-
-  inNeighborhood(fish) {
+  
+  inEatRange(fish) {
     const relPos = fish.position.sub(this.position);
     const dis = relPos.magnitude();
 
-    const cos =
-      this.velocity.dot(relPos) /
-      this.velocity.magnitude() /
-      relPos.magnitude();
-
-    if (dis < this.range && cos < 1 && cos > Math.cos((Math.PI * 3) / 4))
-      return true;
-    else return false;
+    return dis < this.eatRange ? true : false;
   }
-  
-  avoidWall() {
-    this.avoidanceWall.set(0, 0);
 
-    if (this.position.x < this.range)
-      this.avoidanceWall.x += this.avoidanceWallConstant
-    if (this.position.y < this.range)
-      this.avoidanceWall.y += this.avoidanceWallConstant
-    if (this.position.x > canvas.width - this.range)
-      this.avoidanceWall.x -= this.avoidanceWallConstant
-    if (this.position.y > canvas.height - this.range)
-      this.avoidanceWall.y -= this.avoidanceWallConstant
-  }
-  
-  avoidShark(sharks) {
-    this.avoidanceShark.set(0, 0);
-
-    for (const shark of sharks) {
-      if (this.inNeighborhood(shark)) {
-        this.avoidanceShark = this.avoidanceShark.add(
-          this.position.sub(shark.position)
-        );
-      }
-    }
-
-    this.avoidanceShark = this.avoidanceShark.normalize(this.avoidanceSharkConstant);
-  }
-  
   chase(fishes) {
     this.chaseFish.set(0, 0);
     let distance = this.range;
@@ -150,7 +190,6 @@ class Fish {
       for (const fish of fishes) {
         if (this.inNeighborhood(fish)) {
           const tempDistance = this.position.sub(fish.position).magnitude()
-          console.log(tempDistance)
           if (distance > tempDistance) {
             distance = tempDistance;
             this.target = fish;
@@ -160,6 +199,18 @@ class Fish {
     
     if (this.target)
       this.chaseFish = this.target.position.sub(this.position).normalize(this.chaseFishConstant)
+  }
+  
+  eat(fishes) {
+    const newFishes = []
+    for (const fish of fishes) {
+      if (this.inEatRange(fish)) {
+        this.hunger += 30;
+        this.hunger = Math.min(this.hunger, 100);
+      } else newFishes.push(fish)     
+    }
+    
+    return newFishes
   }
 }
 
