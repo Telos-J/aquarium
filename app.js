@@ -113,7 +113,13 @@ function render() {
   }
   for (let shark of sharks) {
     drawFish(shark);
+  
   }
+  
+  /////////// temporary code
+  const fishImage = new Image()
+  fishImage.src = 'assets/fish/fish00.png'
+  context.drawImage(fishImage, 0, 0, 800, 599, canvas.width/2, canvas.height/2, 160, 120)
 };
 
 function loop() {
