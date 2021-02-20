@@ -1,12 +1,3 @@
-class FishPiece {
-  constructor(size, dx, dy, direction, color) {
-    this.size = size;
-    this.dx = dx;
-    this.dy = dy;
-    (this.direction = direction), (this.color = color);
-  }
-}
-
 class Fish {
   constructor(x, y) {
     this.head = Math.random() * 2 * Math.PI;
@@ -17,6 +8,7 @@ class Fish {
     this.hunger = 100;
     this.position = new Vector2(x, y);
     this.velocity = angleToVector(this.head).scale(this.speed);
+    this.frameNum = 0;
   }
 
   move() {
@@ -76,6 +68,17 @@ class SchoolingFish extends Fish {
     this.cohesionConstant = 0.06;
   }
 
+  static fishImages = []
+
+  static buildFish() {
+    for (let i=0; i<20; i++) {
+      const fishImage = new Image();
+      const prefix = i < 10 ? '0' : '';
+      fishImage.src = 'assets/fish/fish' + prefix + i + '.png'
+      SchoolingFish.fishImages.push(fishImage)
+    }
+  }
+
   move() {
     this.velocity = this.velocity.add(
       this.avoidance,
@@ -85,28 +88,6 @@ class SchoolingFish extends Fish {
       this.cohesion,
     );
    super.move()
-  }
-
-  buildFish() {
-    // head
-    this.pieces.push(new FishPiece(this.size * 2, 0, 0, 0, "white"));
-    // //eye
-    this.pieces.push(new FishPiece(this.size, 0, 0, 0, "black"));
-    this.pieces.push(new FishPiece(this.size, 0, this.size, 0, "white"));
-    this.pieces.push(new FishPiece(this.size, 0, -this.size, 0, "white"));
-    //spine
-    this.pieces.push(new FishPiece(this.size, -2 * this.size, 0, 0, "gray"));
-    this.pieces.push(new FishPiece(this.size, -3 * this.size, 0, 0, "gray"));
-    this.pieces.push(new FishPiece(this.size, -this.size, 0, 0, "gray"));
-    // //body
-    this.pieces.push(new FishPiece(this.size, -2 * this.size, this.size, 0, "white"));
-    this.pieces.push(new FishPiece(this.size, -3 * this.size, this.size, 0, "white"));
-    this.pieces.push(new FishPiece(this.size, -3 * this.size, -this.size, 0, "white"));
-    this.pieces.push(new FishPiece(this.size, -2 * this.size, -this.size, 0, "white"));
-    this.pieces.push(new FishPiece(this.size, -this.size, -this.size, 0, "white"));
-    this.pieces.push(new FishPiece(this.size, -this.size, this.size, 0, "white"));
-    // //tail
-    this.pieces.push(new FishPiece(this.size * 3 / 2, -4.5 * this.size, 0, 0, "white"));
   }
 
   avoidShark(sharks) {
@@ -215,44 +196,24 @@ class Shark extends Fish {
   }
 }
 
-const drawFishPiece = function (x, y, size, direction, head, color) {
-  context.beginPath();
-  context.moveTo(
-    x + size * Math.cos(head + direction),
-    y + size * Math.sin(head + direction)
-  );
-  context.lineTo(
-    x + size * Math.cos(head + direction + Math.PI / 2),
-    y + size * Math.sin(head + direction + Math.PI / 2)
-  );
-
-  context.lineTo(
-    x + size * Math.cos(head + direction - Math.PI / 2),
-    y + size * Math.sin(head + direction - Math.PI / 2)
-  );
-  context.closePath();
-  context.fillStyle = color;
-  context.fill();
+function drawFish (fish) {
+  context.drawImage(
+    SchoolingFish.fishImages[fish.frameNum],
+    0,
+    0,
+    800,
+    599,
+    fish.position.x,
+    fish.position.y,
+    160,
+    120
+  )
+  context.restore()
+  fish.frameNum++;
+  if (fish.frameNum > SchoolingFish.fishImages.length - 1) fish.frameNum = 0;
 };
 
-const drawFish = function (fish) {
-  fish.pieces.forEach((fishpiece) => {
-    drawFishPiece(
-      fish.position.x +
-        fishpiece.dx * Math.cos(fish.head) +
-        fishpiece.dy * Math.sin(fish.head),
-      fish.position.y +
-        fishpiece.dx * Math.sin(fish.head) -
-        fishpiece.dy * Math.cos(fish.head),
-      fishpiece.size,
-      fishpiece.direction,
-      fish.head,
-      fishpiece.color
-    );
-  });
-};
-
-const drawNeighborhood = function (fish) {
+function drawNeighborhood (fish) {
   context.fillStyle = "rgba(241, 241, 241, 0.5)";
   context.beginPath();
   context.moveTo(fish.position.x, fish.position.y);

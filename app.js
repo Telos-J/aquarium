@@ -6,7 +6,7 @@ const mode = "display";
 // );
 // controlShark.buildShark()
 
-let numFishes = 0;
+let numFishes = 1;
 let numSharks = 0;
 let fishes = [];
 let sharks = [];
@@ -16,7 +16,6 @@ for (let i = 0; i < numFishes; i++) {
     Math.random() * canvas.width,
     Math.random() * canvas.height
   );
-  fish.buildFish()
   fishes.push(fish);
 }
 
@@ -43,7 +42,6 @@ function update() {
       Math.random() * canvas.width,
       Math.random() * canvas.height
     );
-    fish.buildFish();
     fishes.push(fish);
   }
 
@@ -104,17 +102,6 @@ function update() {
   if (numSharkDiff > 1) numSharks = numSharks - numSharkDiff;
 };
 
-/////////// temporary code
-const fishImages = []
-for (let i=0; i<20; i++) {
-  const fishImage = new Image();
-  const prefix = i < 10 ? '0' : '';
-  fishImage.src = 'assets/fish/fish' + prefix + i + '.png'
-  fishImages.push(fishImage)
-}
-
-let frameNum = 0;
-
 function render() {
   context.fillStyle = "#6f92ee";
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -126,11 +113,6 @@ function render() {
     drawFish(shark);
   
   }
-  
-  /////////// temporary code
-  context.drawImage(fishImages[frameNum], 0, 0, 800, 599, canvas.width/2, canvas.height/2, 160, 120)
-  frameNum++;
-  if (frameNum > 19) frameNum = 0;
 };
 
 function loop() {
@@ -140,6 +122,8 @@ function loop() {
 };
 
 function start() {
+  SchoolingFish.buildFish()
+
   if (mode === "display") loop()
   else if (mode === "nodisplay") {
     while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 10000) {
