@@ -6,8 +6,8 @@ const mode = "display";
 // );
 // controlShark.buildShark()
 
-let numFishes = 10;
-let numSharks = 2;
+let numFishes = 0;
+let numSharks = 0;
 let fishes = [];
 let sharks = [];
 
@@ -104,8 +104,19 @@ function update() {
   if (numSharkDiff > 1) numSharks = numSharks - numSharkDiff;
 };
 
+/////////// temporary code
+const fishImages = []
+for (let i=0; i<20; i++) {
+  const fishImage = new Image();
+  const prefix = i < 10 ? '0' : '';
+  fishImage.src = 'assets/fish/fish' + prefix + i + '.png'
+  fishImages.push(fishImage)
+}
+
+let frameNum = 0;
+
 function render() {
-  context.fillStyle = "blue";
+  context.fillStyle = "#6f92ee";
   context.fillRect(0, 0, canvas.width, canvas.height);
   // drawNeighborhood(controlShark);
   for (let fish of fishes) {
@@ -117,9 +128,9 @@ function render() {
   }
   
   /////////// temporary code
-  const fishImage = new Image()
-  fishImage.src = 'assets/fish/fish00.png'
-  context.drawImage(fishImage, 0, 0, 800, 599, canvas.width/2, canvas.height/2, 160, 120)
+  context.drawImage(fishImages[frameNum], 0, 0, 800, 599, canvas.width/2, canvas.height/2, 160, 120)
+  frameNum++;
+  if (frameNum > 19) frameNum = 0;
 };
 
 function loop() {
