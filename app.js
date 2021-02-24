@@ -111,7 +111,6 @@ function render() {
   }
   for (let shark of sharks) {
     drawFish(shark);
-  
   }
 };
 
