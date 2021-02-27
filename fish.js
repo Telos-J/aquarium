@@ -71,10 +71,10 @@ class SchoolingFish extends Fish {
   static fishImages = []
 
   static buildFish() {
-    for (let i=0; i<20; i++) {
+    for (let i=0; i<1; i++) {
       const fishImage = new Image();
       const prefix = i < 10 ? '0' : '';
-      fishImage.src = 'assets/fish/fish' + prefix + i + '.png'
+      fishImage.src = 'assets/flounder/flounder' + prefix + i + '.png'
       SchoolingFish.fishImages.push(fishImage)
     }
   }
@@ -197,16 +197,25 @@ class Shark extends Fish {
 }
 
 function drawFish (fish) {
+  context.save()
+  context.translate(fish.position.x, fish.position.y)
+  if (fish.velocity.x > 0) {
+    context.rotate(fish.head)
+  } else {
+    context.rotate(fish.head - Math.PI)
+    context.scale(-1, 1)
+  }
+
   context.drawImage(
     SchoolingFish.fishImages[fish.frameNum],
     0,
     0,
-    800,
-    599,
-    fish.position.x,
-    fish.position.y,
-    160,
-    120
+    390,
+    200,
+    -92,
+    -50,
+    184,
+    100
   )
   context.restore()
   fish.frameNum++;
