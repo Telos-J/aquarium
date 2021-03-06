@@ -1,17 +1,29 @@
 class Fish {
-  constructor(x, y) {
+  constructor() {
     this.head = Math.random() * 2 * Math.PI;
     this.pieces = [];
     this.size = 3;
     this.speed = 3;
     this.range = 200;
     this.hunger = 100;
-    this.position = new Vector2(x, y);
+    this.position = new Vector2(
+      Math.random() * canvas.width,
+      sealevel + this.range + Math.random() *
+      (canvas.height - sealevel - this.range)
+    );
     this.velocity = angleToVector(this.head).scale(this.speed);
     this.frameNum = 0;
+    this.avoidanceWall = new Vector2();
+    this.avoidanceSurface = new Vector2();
+    this.avoidanceWallConstant = 0.1;
+    this.avoidanceSurfaceConstant = 0.15;
   }
 
   move() {
+    this.velocity = this.velocity.add(
+      this.avoidanceWall,
+      this.avoidanceSurface
+    )
     this.velocity = this.velocity.normalize(this.speed);
     this.head = vectorToAngle(this.velocity);
     this.position = this.position.add(this.velocity);
@@ -41,28 +53,30 @@ class Fish {
 
     if (this.position.x < this.range)
       this.avoidanceWall.x += this.avoidanceWallConstant
-    if (this.position.y < this.range)
-      this.avoidanceWall.y += this.avoidanceWallConstant
     if (this.position.x > canvas.width - this.range)
       this.avoidanceWall.x -= this.avoidanceWallConstant
     if (this.position.y > canvas.height - this.range)
       this.avoidanceWall.y -= this.avoidanceWallConstant
   }
+
+  avoidSurface() {
+    this.avoidanceSurface.set(0, 0);
+    if (this.position.y < this.range + canvas.width / mapWidth * sealevel) 
+      this.avoidanceSurface.y += this.avoidanceSurfaceConstant
+  }
 }
 
 class SchoolingFish extends Fish {
-  constructor(x, y) {
-    super(x, y);
+  constructor() {
+    super();
     this.size = 3;
     this.speed = 3;
     this.range = 200;
     this.avoidance = new Vector2();
-    this.avoidanceWall = new Vector2();
     this.avoidanceShark = new Vector2();
     this.alignment = new Vector2();
     this.cohesion = new Vector2();
     this.avoidanceConstant = 0.06;
-    this.avoidanceWallConstant = 0.1;
     this.avoidanceSharkConstant = 0.4;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
@@ -82,7 +96,6 @@ class SchoolingFish extends Fish {
   move() {
     this.velocity = this.velocity.add(
       this.avoidance,
-      this.avoidanceWall,
       this.avoidanceShark,
       this.alignment,
       this.cohesion,
@@ -106,13 +119,12 @@ class SchoolingFish extends Fish {
 }
 
 class Shark extends Fish {
-  constructor(x, y) {
-    super(x, y);
+  constructor() {
+    super();
     this.size = 3;
     this.speed = 5;
     this.range = 200;
     this.eatRange = 10;
-    this.avoidanceWall = new Vector2();
     this.chaseFish = new Vector2()
     this.avoidanceWallConstant = 0.2;
     this.chaseFishConstant = 0.1;
@@ -121,8 +133,7 @@ class Shark extends Fish {
 
   move() {
     this.velocity = this.velocity.add(
-      this.chaseFish,
-      this.avoidanceWall
+      this.chaseFish
     );
    super.move()
   }
@@ -210,12 +221,12 @@ function drawFish (fish) {
     SchoolingFish.fishImages[fish.frameNum],
     0,
     0,
-    390,
-    200,
-    -92,
-    -50,
-    184,
-    100
+    59,
+    35,
+    -29,
+    -17,
+    58,
+    34
   )
   context.restore()
   fish.frameNum++;

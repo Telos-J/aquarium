@@ -1,4 +1,9 @@
 const mode = "display";
+const bg = new Image();
+bg.src = 'assets/aquarium-background.png';
+const mapStart = 300;
+const mapWidth = 920;
+const sealevel = 217;
 
 // const controlShark = new Shark(
 //   Math.random() * canvas.width,
@@ -12,18 +17,12 @@ let fishes = [];
 let sharks = [];
 
 for (let i = 0; i < numFishes; i++) {
-  const fish = new SchoolingFish(
-    Math.random() * canvas.width,
-    Math.random() * canvas.height
-  );
+  const fish = new SchoolingFish();
   fishes.push(fish);
 }
 
 for (let i = 0; i < numSharks; i++) {
-  const shark = new Shark(
-    Math.random() * canvas.width,
-    Math.random() * canvas.height
-  );
+  const shark = new Shark();
   shark.buildShark()
   sharks.push(shark);
 }
@@ -63,7 +62,8 @@ function update() {
     let headAverage = fish.head;
     let positionAverage = fish.position;
     
-    fish.avoidWall()
+    fish.avoidWall();
+    fish.avoidSurface();
     
     for (const otherFish of fishes) {
       if (fish.inNeighborhood(otherFish)) {
@@ -103,9 +103,10 @@ function update() {
 };
 
 function render() {
-  context.fillStyle = "#6f92ee";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  // drawNeighborhood(controlShark);
+  const width = mapWidth;
+  const height = mapWidth / canvas.width * canvas.height;
+  context.drawImage(bg, 0, mapStart, width, height, 0, 0, canvas.width, canvas.height)
+  drawNeighborhood(fishes[0]);
   for (let fish of fishes) {
     drawFish(fish);
   }
