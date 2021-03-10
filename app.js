@@ -1,36 +1,36 @@
 const mode = "display";
-const bg = new Image();
-bg.src = 'assets/aquarium-background.png';
-const mapStart = 300;
-const mapWidth = 920;
-const sealevel = 217;
 
-// const controlShark = new Shark(
-//   Math.random() * canvas.width,
-//   Math.random() * canvas.height
-// );
-// controlShark.buildShark()
+const skyWidth = 1920;
+const skyHeight = 362;
+let skyFrameIndex = 0;
+const sealevel = canvas.width / skyWidth * skyHeight;
 
 let numFishes = 1;
 let numSharks = 0;
 let fishes = [];
 let sharks = [];
 
-for (let i = 0; i < numFishes; i++) {
-  const fish = new SchoolingFish();
-  fishes.push(fish);
-}
-
-for (let i = 0; i < numSharks; i++) {
-  const shark = new Shark();
-  shark.buildShark()
-  sharks.push(shark);
-}
-
 const KFish = 50;
 const rFish = 0.001;
 const KShark = 10;
 const rShark = 0.0005;
+
+async function init() {
+  await assets.loadAssets();
+
+  for (let i = 0; i < numFishes; i++) {
+    const fish = new SchoolingFish();
+    fishes.push(fish);
+  }
+
+  for (let i = 0; i < numSharks; i++) {
+    const shark = new Shark();
+    shark.buildShark()
+    sharks.push(shark);
+  }
+
+  start();
+}
 
 function update() {
   numFishes = numFishes + rFish * numFishes * (1 - numFishes / KFish);
@@ -103,15 +103,43 @@ function update() {
 };
 
 function render() {
-  const width = mapWidth;
-  const height = mapWidth / canvas.width * canvas.height;
-  context.drawImage(bg, 0, mapStart, width, height, 0, 0, canvas.width, canvas.height)
-  drawNeighborhood(fishes[0]);
+  const skyFrame = assets.frameSets.sky.frames[skyFrameIndex]; 
+  const seaFrame = assets.frameSets.sea.frames[0]; 
+  context.drawImage(
+    skyFrame.img,
+    skyFrame.x, 
+    skyFrame.y, 
+    skyFrame.width, 
+    skyFrame.height, 
+    0, 
+    0, 
+    canvas.width, 
+    canvas.width * skyHeight / skyWidth
+  )
+  context.drawImage(
+    seaFrame.img, 
+    seaFrame.x, 
+    seaFrame.y, 
+    seaFrame.width, 
+    seaFrame.width * canvas.height / canvas.width,
+    0,
+    canvas.width * skyHeight / skyWidth,
+    canvas.width,
+    canvas.height - canvas.width * skyHeight / skyWidth
+  )
+  skyFrameIndex++
+  if (skyFrameIndex >= assets.frameSets.sky.frames.length) skyFrameIndex = 0
+
+  // context.beginPath()
+  // context.moveTo(0, sealevel)
+  // context.lineTo(canvas.width, sealevel)
+  // context.stroke()
+  // drawNeighborhood(fishes[0]);
   for (let fish of fishes) {
-    drawFish(fish);
+    fish.draw()
   }
   for (let shark of sharks) {
-    drawFish(shark);
+    // drawFish(shark);
   }
 };
 
@@ -122,8 +150,6 @@ function loop() {
 };
 
 function start() {
-  SchoolingFish.buildFish()
-
   if (mode === "display") loop()
   else if (mode === "nodisplay") {
     while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 10000) {
@@ -136,4 +162,4 @@ function start() {
   }
 }
 
-start();
+init()

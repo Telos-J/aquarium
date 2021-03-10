@@ -1,22 +1,24 @@
 class Fish {
   constructor() {
-    this.head = Math.random() * 2 * Math.PI;
-    this.pieces = [];
     this.size = 3;
     this.speed = 3;
     this.range = 200;
     this.hunger = 100;
+    this.head = Math.random() * 2 * Math.PI;
+
     this.position = new Vector2(
       Math.random() * canvas.width,
       sealevel + this.range + Math.random() *
       (canvas.height - sealevel - this.range)
     );
+
     this.velocity = angleToVector(this.head).scale(this.speed);
-    this.frameNum = 0;
     this.avoidanceWall = new Vector2();
     this.avoidanceSurface = new Vector2();
-    this.avoidanceWallConstant = 0.1;
-    this.avoidanceSurfaceConstant = 0.15;
+    this.avoidanceWallConstant = 0.01;
+    this.avoidanceSurfaceConstant = 0.5;
+
+    this.frameIndex = 0;
   }
 
   move() {
@@ -61,17 +63,45 @@ class Fish {
 
   avoidSurface() {
     this.avoidanceSurface.set(0, 0);
-    if (this.position.y < this.range + canvas.width / mapWidth * sealevel) 
-      this.avoidanceSurface.y += this.avoidanceSurfaceConstant
+    if (this.position.y < this.range + sealevel) 
+      this.avoidanceSurface.y = 
+        this.avoidanceSurfaceConstant / (this.range ** 2) *
+        ((this.position.y - (sealevel + this.range)) ** 2)
   }
+
+  draw() {
+    const frame = this.frameSet.frames[this.frameIndex];
+
+    context.save()
+    context.translate(this.position.x, this.position.y)
+    if (this.velocity.x > 0) {
+      context.rotate(this.head)
+    } else {
+      context.rotate(this.head - Math.PI)
+      context.scale(-1, 1)
+    }
+    context.drawImage(
+        frame.img,
+        frame.x, 
+        frame.y,
+        frame.width, 
+        frame.height, 
+        -frame.width / 2, 
+        -frame.height / 2,
+        frame.width,
+        frame.height
+    )
+    context.restore()
+
+    this.frameIndex++;
+    if (this.frameIndex >= this.frameSet.frames.length)
+      this.frameIndex = 0;
+}
 }
 
 class SchoolingFish extends Fish {
   constructor() {
     super();
-    this.size = 3;
-    this.speed = 3;
-    this.range = 200;
     this.avoidance = new Vector2();
     this.avoidanceShark = new Vector2();
     this.alignment = new Vector2();
@@ -80,27 +110,17 @@ class SchoolingFish extends Fish {
     this.avoidanceSharkConstant = 0.4;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
-  }
-
-  static fishImages = []
-
-  static buildFish() {
-    for (let i=0; i<1; i++) {
-      const fishImage = new Image();
-      const prefix = i < 10 ? '0' : '';
-      fishImage.src = 'assets/flounder/flounder' + prefix + i + '.png'
-      SchoolingFish.fishImages.push(fishImage)
-    }
+    this.frameSet = assets.frameSets.schoolingFish;
   }
 
   move() {
+    super.move()
     this.velocity = this.velocity.add(
       this.avoidance,
       this.avoidanceShark,
       this.alignment,
       this.cohesion,
     );
-   super.move()
   }
 
   avoidShark(sharks) {
@@ -114,7 +134,8 @@ class SchoolingFish extends Fish {
       }
     }
 
-    this.avoidanceShark = this.avoidanceShark.normalize(this.avoidanceSharkConstant);
+    this.avoidanceShark = this.avoidanceShark
+      .normalize(this.avoidanceSharkConstant);
   }
 }
 
@@ -131,41 +152,17 @@ class Shark extends Fish {
     this.target = undefined;
   }
 
+  static images = []
+  
+  static build() {
+
+  }
+
   move() {
+    super.move()
     this.velocity = this.velocity.add(
       this.chaseFish
     );
-   super.move()
-  }
-  
-  buildShark() {
-    //Fin
-    this.pieces.push(new FishPiece(this.size*2 , -this.size*7, -this.size*3, 0, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size*2 , -this.size*1, -this.size*3, -Math.PI, "#5295c0"));
-    // head
-    this.pieces.push(new FishPiece(this.size *3, 0, 0, Math.PI/2, "white"));
-    this.pieces.push(new FishPiece(this.size *5, -this.size*5, -this.size*3, -Math.PI/2, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size *5, -this.size*5, this.size*3, Math.PI/2, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size *3, -this.size*10, 0, Math.PI/2, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size *3, -this.size*10, 0, -Math.PI/2, "#5295c0"));
-    //Support Tail - Body
-    this.pieces.push(new FishPiece(this.size *2.6, -this.size*13, this.size*2, Math.PI/2.4, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size *2.7, -this.size*13, -this.size*2.1, -Math.PI/2.4, "#5295c0"));
-    //Support Tail - Body 2
-    this.pieces.push(new FishPiece(this.size *2, -this.size*16, this.size, Math.PI/2.4, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size *2, -this.size*16, -this.size*1.2, -Math.PI/2.4, "#5295c0"));
-    //Fill in the hole
-    this.pieces.push(new FishPiece(this.size *2.5, -this.size*14, -this.size*0.9, -Math.PI/2.4, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size *3, -this.size*2.5, -this.size*3, -Math.PI/2, "white"));
-    this.pieces.push(new FishPiece(this.size *3, 0, 0, -Math.PI/2,"#5295c0"));
-    this.pieces.push(new FishPiece(this.size *3, -this.size*5, 0, Math.PI/2, "#5295c0"));
-    //Tail
-    this.pieces.push(new FishPiece(this.size*2 , -this.size*17.5, this.size*0, -Math.PI/2, "#5295c0"));
-    this.pieces.push(new FishPiece(this.size*2 , -this.size*19.5, this.size*2, 0, "#5295c0"));
-    //tail 2
-    this.pieces.push(new FishPiece(this.size*2.5 , -this.size*18, -this.size*1, 0, "#5295c0"));
-    //top fin
-    this.pieces.push(new FishPiece(this.size*4 , -this.size*8, this.size*3, 0, "#5295c0"));
   }
   
   inEatRange(fish) {
@@ -206,32 +203,6 @@ class Shark extends Fish {
     return newFishes
   }
 }
-
-function drawFish (fish) {
-  context.save()
-  context.translate(fish.position.x, fish.position.y)
-  if (fish.velocity.x > 0) {
-    context.rotate(fish.head)
-  } else {
-    context.rotate(fish.head - Math.PI)
-    context.scale(-1, 1)
-  }
-
-  context.drawImage(
-    SchoolingFish.fishImages[fish.frameNum],
-    0,
-    0,
-    59,
-    35,
-    -29,
-    -17,
-    58,
-    34
-  )
-  context.restore()
-  fish.frameNum++;
-  if (fish.frameNum > SchoolingFish.fishImages.length - 1) fish.frameNum = 0;
-};
 
 function drawNeighborhood (fish) {
   context.fillStyle = "rgba(241, 241, 241, 0.5)";
