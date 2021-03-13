@@ -5,7 +5,7 @@ const skyHeight = 362;
 let skyFrameIndex = 0;
 const sealevel = canvas.width / skyWidth * skyHeight;
 
-let numFishes = 1;
+let numFishes = 30;
 let numSharks = 0;
 let fishes = [];
 let sharks = [];
@@ -54,42 +54,18 @@ function update() {
   }
   
   for (let fish of fishes) {
-    fish.avoidance.set(0, 0);
-    fish.alignment.set(0, 0);
-    fish.cohesion.set(0, 0);
-
-    let counter = 0;
-    let headAverage = fish.head;
-    let positionAverage = fish.position;
-    
-    fish.avoidWall();
+    fish.avoid(fishes);
+    fish.align(fishes);
     fish.avoidSurface();
-    
-    for (const otherFish of fishes) {
-      if (fish.inNeighborhood(otherFish)) {
-        fish.avoidance = fish.avoidance.add(
-          fish.position.sub(otherFish.position)
-        );
-        headAverage = (counter * headAverage + otherFish.head) / (counter + 1);
-        positionAverage = positionAverage
-          .scale(counter)
-          .add(otherFish.position)
-          .scale(1 / (counter + 1));
-      }
-    }
-
-    fish.avoidShark(sharks)
-
-    fish.avoidance = fish.avoidance.normalize(fish.avoidanceConstant);
-    fish.alignment = angleToVector(headAverage).normalize(fish.alignmentConstant);
-    fish.cohesion = positionAverage.sub(fish.position).normalize(fish.cohesionConstant);
+    fish.avoidBottom();
+    fish.avoidShark(sharks);
+    fish.level();
     fish.move();
   }
   
   const tempSharks = sharks;
   
   for (const shark of tempSharks) {
-    shark.avoidWall()
     shark.move()
     shark.chase(fishes)
     fishes = shark.eat(fishes)

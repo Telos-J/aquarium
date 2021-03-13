@@ -1,6 +1,6 @@
 class Fish {
   constructor() {
-    this.size = 3;
+    this.width = 60;
     this.speed = 3;
     this.range = 200;
     this.hunger = 100;
@@ -13,22 +13,30 @@ class Fish {
     );
 
     this.velocity = angleToVector(this.head).scale(this.speed);
-    this.avoidanceWall = new Vector2();
     this.avoidanceSurface = new Vector2();
-    this.avoidanceWallConstant = 0.01;
+    this.avoidanceBottom = new Vector2();
+    this.leveling = new Vector2();
     this.avoidanceSurfaceConstant = 0.5;
+    this.avoidanceBottomConstant = 0.1;
+    this.levelingConstant = 0.02;
 
     this.frameIndex = 0;
   }
 
   move() {
     this.velocity = this.velocity.add(
-      this.avoidanceWall,
-      this.avoidanceSurface
+      this.leveling,
+      this.avoidanceSurface,
+      this.avoidanceBottom,
     )
     this.velocity = this.velocity.normalize(this.speed);
     this.head = vectorToAngle(this.velocity);
     this.position = this.position.add(this.velocity);
+
+    if (this.position.x < -this.width) 
+      this.position.x = canvas.width + this.width
+    else if (this.position.x > canvas.width + this.width)
+      this.position.x = -this.width
   }
   
   starve() {
@@ -50,23 +58,25 @@ class Fish {
     else return false;
   }
   
-  avoidWall() {
-    this.avoidanceWall.set(0, 0);
-
-    if (this.position.x < this.range)
-      this.avoidanceWall.x += this.avoidanceWallConstant
-    if (this.position.x > canvas.width - this.range)
-      this.avoidanceWall.x -= this.avoidanceWallConstant
-    if (this.position.y > canvas.height - this.range)
-      this.avoidanceWall.y -= this.avoidanceWallConstant
+  avoidBottom() {
+    this.avoidanceBottom.set(0, 0);
+    if (this.position.y > canvas.height - this.range) 
+      this.avoidanceBottom.y = 
+        -this.avoidanceBottomConstant / this.range ** 2 * 
+        (this.position.y - (canvas.height - this.range)) ** 2
   }
 
   avoidSurface() {
     this.avoidanceSurface.set(0, 0);
     if (this.position.y < this.range + sealevel) 
       this.avoidanceSurface.y = 
-        this.avoidanceSurfaceConstant / (this.range ** 2) *
-        ((this.position.y - (sealevel + this.range)) ** 2)
+        this.avoidanceSurfaceConstant / this.range ** 2 *
+        (this.position.y - (sealevel + this.range)) ** 2
+  }
+
+  level() {
+    this.leveling.set(this.velocity.x, 0);
+    this.leveling = this.leveling.normalize(this.levelingConstant);
   }
 
   draw() {
@@ -86,10 +96,10 @@ class Fish {
         frame.y,
         frame.width, 
         frame.height, 
-        -frame.width / 2, 
-        -frame.height / 2,
-        frame.width,
-        frame.height
+        -this.width / 2,
+        -this.width * frame.height / frame.width / 2,
+        this.width,
+        this.width * frame.height / frame.width
     )
     context.restore()
 
@@ -106,7 +116,7 @@ class SchoolingFish extends Fish {
     this.avoidanceShark = new Vector2();
     this.alignment = new Vector2();
     this.cohesion = new Vector2();
-    this.avoidanceConstant = 0.06;
+    this.avoidanceConstant = 0.03;
     this.avoidanceSharkConstant = 0.4;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
@@ -121,6 +131,35 @@ class SchoolingFish extends Fish {
       this.alignment,
       this.cohesion,
     );
+  }
+
+  avoid(fishes) {
+    this.avoidance.set(0, 0);
+
+    for (const fish of fishes) {
+      if (this.inNeighborhood(fish)) {
+        this.avoidance = this.avoidance.add(
+          this.position.sub(fish.position)
+        );
+      }
+    }
+
+    this.avoidance = this.avoidance.normalize(this.avoidanceConstant)
+  }
+
+  align(fishes) {
+    this.alignment.set(0, 0);
+
+    for (const fish of fishes) {
+      if (this.inNeighborhood(fish)) {
+        this.alignment = this.alignment.add(fish.velocity)
+      }
+    }
+
+    this.alignment = this.alignment.normalize(this.alignmentConstant);
+  }
+
+  coerce(fishes) {
   }
 
   avoidShark(sharks) {
@@ -147,7 +186,6 @@ class Shark extends Fish {
     this.range = 200;
     this.eatRange = 10;
     this.chaseFish = new Vector2()
-    this.avoidanceWallConstant = 0.2;
     this.chaseFishConstant = 0.1;
     this.target = undefined;
   }
