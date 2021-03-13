@@ -116,7 +116,7 @@ class SchoolingFish extends Fish {
     this.avoidanceShark = new Vector2();
     this.alignment = new Vector2();
     this.cohesion = new Vector2();
-    this.avoidanceConstant = 0.03;
+    this.avoidanceConstant = 0.06;
     this.avoidanceSharkConstant = 0.4;
     this.alignmentConstant = 0.07;
     this.cohesionConstant = 0.06;
@@ -139,7 +139,7 @@ class SchoolingFish extends Fish {
     for (const fish of fishes) {
       if (this.inNeighborhood(fish)) {
         this.avoidance = this.avoidance.add(
-          this.position.sub(fish.position)
+          this.position.sub(fish.position).normalize()
         );
       }
     }
@@ -160,6 +160,17 @@ class SchoolingFish extends Fish {
   }
 
   coerce(fishes) {
+    this.alignment.set(0, 0);
+    
+    for (const fish of fishes) {
+      if (this.inNeighborhood(fish)) {
+        this.cohesion = this.cohesion.add(
+          fish.position.sub(this.position)
+        );
+      }
+    }
+
+    this.cohesion = this.cohesion.normalize(this.cohesionConstant)
   }
 
   avoidShark(sharks) {

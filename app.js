@@ -56,6 +56,7 @@ function update() {
   for (let fish of fishes) {
     fish.avoid(fishes);
     fish.align(fishes);
+    fish.coerce(fishes);
     fish.avoidSurface();
     fish.avoidBottom();
     fish.avoidShark(sharks);
