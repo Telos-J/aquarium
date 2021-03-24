@@ -5,7 +5,7 @@ class Assets {
 
     addFrameSets(...frameSets) {
         for (let frameSet of frameSets) {
-            this.frameSets[frameSet[0]] = frameSet[1] ;
+            this.frameSets[frameSet[0]] = frameSet[1];
         }
     }
 
@@ -37,13 +37,13 @@ class Frame {
 }
 
 class FrameSet {
-    constructor(prefix, extension, numFrames=1) {
+    constructor(prefix, extension, numFrames = 1) {
         this.frames = [];
         this.prefix = prefix;
         this.extension = extension;
         this.numFrames = numFrames;
     }
-    
+
     loadImage(url) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -52,7 +52,7 @@ class FrameSet {
             img.src = url;
         });
     }
-    
+
     loadFrameSet() {
         const imgs = [];
         const self = this;
@@ -79,5 +79,8 @@ assets.addFrameSets(
     ["schoolingFish", new FrameSet('assets/img/schoolingFish/fish', 'png')],
     ["sky", new FrameSet('assets/img/sky/sky', 'png', 900)],
     ["boulder", new FrameSet('assets/img/boulder', 'png')],
-    ["sea", new FrameSet('assets/img/sea', 'png')]
+    ["sea", new FrameSet('assets/img/sea', 'png')],
+    ["body", new FrameSet('assets/img/body', 'png')],
+    ["cabin", new FrameSet('assets/img/cabin', 'png')],
+    ["net", new FrameSet('assets/img/net', 'png')],
 )

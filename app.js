@@ -2,7 +2,6 @@ const mode = "display";
 
 const skyWidth = 1920;
 const skyHeight = 362;
-let skyFrameIndex = 0;
 const sealevel = canvas.width / skyWidth * skyHeight;
 
 let numFishes = 30;
@@ -15,128 +14,127 @@ const rFish = 0.001;
 const KShark = 10;
 const rShark = 0.0005;
 
+let boat;
+let sky;
+let sea;
+
 async function init() {
-  await assets.loadAssets();
+    await assets.loadAssets();
 
-  for (let i = 0; i < numFishes; i++) {
-    const fish = new SchoolingFish();
-    fishes.push(fish);
-  }
+    for (let i = 0; i < numFishes; i++) {
+        const fish = new SchoolingFish();
+        fishes.push(fish);
+    }
 
-  for (let i = 0; i < numSharks; i++) {
-    const shark = new Shark();
-    shark.buildShark()
-    sharks.push(shark);
-  }
+    for (let i = 0; i < numSharks; i++) {
+        const shark = new Shark();
+        shark.buildShark()
+        sharks.push(shark);
+    }
 
-  start();
+    boat = new Boat();
+    sky = new Sky();
+    sea = new Sea()
+
+    addEventListener('keydown', (e) => {
+        if (e.code === 'ArrowDown') boat.lowerNet();
+        else if (e.code === 'ArrowUp') boat.raiseNet();
+    });
+    addEventListener('keyup', (e) => {
+        boat.haltNet();
+    });
+
+    start();
 }
 
 function update() {
-  numFishes = numFishes + rFish * numFishes * (1 - numFishes / KFish);
-  numSharks = numSharks + rShark * numSharks * (1 - numSharks / KShark);
+    numFishes = numFishes + rFish * numFishes * (1 - numFishes / KFish);
+    numSharks = numSharks + rShark * numSharks * (1 - numSharks / KShark);
 
-  for (let i = 0; i < Math.floor(numFishes - fishes.length); i++) {
-    const fish = new SchoolingFish(
-      Math.random() * canvas.width,
-      Math.random() * canvas.height
-    );
-    fishes.push(fish);
-  }
+    for (let i = 0; i < Math.floor(numFishes - fishes.length); i++) {
+        const fish = new SchoolingFish(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height
+        );
+        fishes.push(fish);
+    }
 
-  for (let i = 0; i < Math.floor(numSharks - sharks.length); i++) {
-    const shark = new Shark(
-      Math.random() * canvas.width,
-      Math.random() * canvas.height
-    );
-    shark.buildShark();
-    sharks.push(shark);
-  }
-  
-  for (let fish of fishes) {
-    fish.avoid(fishes);
-    fish.align(fishes);
-    fish.coerce(fishes);
-    fish.avoidSurface();
-    fish.avoidBottom();
-    fish.avoidShark(sharks);
-    fish.level();
-    fish.move();
-  }
-  
-  const tempSharks = sharks;
-  
-  for (const shark of tempSharks) {
-    shark.move()
-    shark.chase(fishes)
-    fishes = shark.eat(fishes)
-    sharks = sharks.filter((shark) => !shark.starve())
-  }
-  
-  const numFishDiff = numFishes - fishes.length;
-  if (numFishDiff > 1) numFishes = numFishes - numFishDiff;
-  const numSharkDiff = numSharks - sharks.length;
-  if (numSharkDiff > 1) numSharks = numSharks - numSharkDiff;
+    for (let i = 0; i < Math.floor(numSharks - sharks.length); i++) {
+        const shark = new Shark(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height
+        );
+        shark.buildShark();
+        sharks.push(shark);
+    }
+
+    for (let fish of fishes) {
+        fish.avoid(fishes);
+        fish.align(fishes);
+        fish.coerce(fishes);
+        fish.avoidSurface();
+        fish.avoidBottom();
+        fish.avoidShark(sharks);
+        fish.level();
+        if (!boat.collideNet(fish)) fish.move();
+    }
+
+    const tempSharks = sharks;
+
+    for (const shark of tempSharks) {
+        shark.move()
+        shark.chase(fishes)
+        fishes = shark.eat(fishes)
+        sharks = sharks.filter((shark) => !shark.starve())
+    }
+
+    const numFishDiff = numFishes - fishes.length;
+    if (numFishDiff > 1) numFishes = numFishes - numFishDiff;
+    const numSharkDiff = numSharks - sharks.length;
+    if (numSharkDiff > 1) numSharks = numSharks - numSharkDiff;
+
+    boat.update();
 };
 
 function render() {
-  const skyFrame = assets.frameSets.sky.frames[skyFrameIndex]; 
-  const seaFrame = assets.frameSets.sea.frames[0]; 
-  context.drawImage(
-    skyFrame.img,
-    skyFrame.x, 
-    skyFrame.y, 
-    skyFrame.width, 
-    skyFrame.height, 
-    0, 
-    0, 
-    canvas.width, 
-    canvas.width * skyHeight / skyWidth
-  )
-  context.drawImage(
-    seaFrame.img, 
-    seaFrame.x, 
-    seaFrame.y, 
-    seaFrame.width, 
-    seaFrame.width * canvas.height / canvas.width,
-    0,
-    canvas.width * skyHeight / skyWidth,
-    canvas.width,
-    canvas.height - canvas.width * skyHeight / skyWidth
-  )
-  skyFrameIndex++
-  if (skyFrameIndex >= assets.frameSets.sky.frames.length) skyFrameIndex = 0
+    sky.draw();
+    sea.draw();
 
-  // context.beginPath()
-  // context.moveTo(0, sealevel)
-  // context.lineTo(canvas.width, sealevel)
-  // context.stroke()
-  // drawNeighborhood(fishes[0]);
-  for (let fish of fishes) {
-    fish.draw()
-  }
-  for (let shark of sharks) {
-    // drawFish(shark);
-  }
+    for (let fish of fishes) {
+        fish.draw()
+    }
+
+    for (let shark of sharks) {
+        drawFish(shark);
+    }
+
+    boat.draw();
+
+    // context.beginPath()
+    // context.moveTo(0, sealevel)
+    // context.lineTo(canvas.width, sealevel)
+    // context.stroke()
+    // drawNeighborhood(fishes[0]);
 };
 
 function loop() {
-  update();
-  render();
-  window.requestAnimationFrame(loop);
+    update();
+    render();
+    window.requestAnimationFrame(loop);
 };
 
 function start() {
-  if (mode === "display") loop()
-  else if (mode === "nodisplay") {
-    while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 10000) {
-      update()
-      populationChart.data.labels.push('')
-      populationChart.data.datasets[0].data.push(sharks.length)
-      populationChart.data.datasets[1].data.push(fishes.length)
+    if (mode === "display") loop()
+    else if (mode === "nodisplay") {
+        while (fishes.length && sharks.length && populationChart.data.datasets[0].data.length < 10000) {
+            update()
+            populationChart.data.labels.push('')
+            populationChart.data.datasets[0].data.push(sharks.length)
+            populationChart.data.datasets[1].data.push(fishes.length)
+        }
+        populationChart.update()
     }
-    populationChart.update()
-  }
 }
 
 init()
+
