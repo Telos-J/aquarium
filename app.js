@@ -4,7 +4,7 @@ const skyWidth = 1920;
 const skyHeight = 362;
 const sealevel = canvas.width / skyWidth * skyHeight;
 
-let numFishes = 30;
+let numFishes = 1;
 let numSharks = 0;
 let fishes = [];
 let sharks = [];

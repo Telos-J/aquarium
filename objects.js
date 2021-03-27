@@ -90,11 +90,11 @@ class Boat {
     }
 
     lowerNet() {
-        this.net.speed = 1;
+        this.net.speed = 3;
     }
 
     raiseNet() {
-        this.net.speed = -1;
+        this.net.speed = -3;
     }
 
     haltNet() {
