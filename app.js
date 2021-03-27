@@ -99,6 +99,7 @@ function update() {
 function render() {
     sky.draw();
     sea.draw();
+    boat.draw();
 
     for (let fish of fishes) {
         fish.draw()
@@ -108,7 +109,6 @@ function render() {
         drawFish(shark);
     }
 
-    boat.draw();
 
     // context.beginPath()
     // context.moveTo(0, sealevel)
